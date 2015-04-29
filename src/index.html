@@ -3,6 +3,26 @@
 		<script src="../lib/WebGlConstants.js" ></script>
 		<script src="../lib/glMatrix-0.9.5.min.js" ></script>
 
+		<!-- FRAGMENT SHADER -->
+		<script id="shader-fs" type="x-shader/x-fragment" >
+			precision mediump float;
+			void main(void) {
+				gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+			}
+		</script>
+
+		<!-- VERTEX SHADER -->
+		<script id="shader-vs" type="x-shader/x-vertex" >
+			attribute vec3 aVertexPosition;
+
+			uniform mat4 uMVMatrix;
+			uniform mat4 uPMatrix;
+
+			void main(void) {
+				gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+			}
+		</script>
+
 		<script type="text/javascript" >
 			var gl;// Global variable holding WebGL context
 			
@@ -61,6 +81,45 @@
 				
 				return gl;
 			}
+
+			function getShader(gl, scriptId) {
+				var shaderScript = document.getElementById(scriptId);
+				if(!shaderScript) {
+					console.log('No shaderScript by ' + scriptId);
+					return null;
+				}
+
+				var str = "";
+				var k = shaderScript.firstChild;
+				while(k) {
+					if(k.nodeType === 3){
+						str += k.textContent;
+					}
+					k = k.nextSibling;
+				}
+
+				var shader;
+				if(shaderScript.type == "x-shader/x-fragment") {
+					shader = gl.createShader(gl.FRAGMENT_SHADER);
+				}
+				else if (shaderScript.type == "x-shader/x-vertex") {
+					shader = gl.createShader(gl.VERTEX_SHADER);
+				}
+				else {
+					return null;
+				}
+
+				gl.shaderSource(shader, str);
+				gl.compileShader(shader);
+
+				if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+					alert(gl.getShaderInfoLog(shader));
+					console.log(gl.getShaderInfoLog(shader));
+					return null;
+				}
+
+				return shader;
+			}
 			
 			// InitShaders?
 			var shaderProgram;
@@ -74,6 +133,7 @@
 				gl.linkProgram(shaderProgram);
 				
 				if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+					console.log(WebGLConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS);
 					alert(WebGLConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS);
 				}
 				
