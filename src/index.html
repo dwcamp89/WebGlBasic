@@ -194,6 +194,14 @@
 				gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 				setMatrixUniforms();
 				gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numberOfItems);
+
+				// Move camera
+				mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+				gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				setMatrixUniforms();
+				gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numberOfItems);
 			}
 		</script>
 		
