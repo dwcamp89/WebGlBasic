@@ -38,7 +38,7 @@
 			
 			function start() {
 				// Get the canvas by ID
-				var canvas = document.getElementById(WebGLConstants.CANVAS_ID);
+				var canvas = document.getElementById(WebGlConstants.CANVAS_ID);
 				
 				gl = initWebGL(canvas);
 				
@@ -61,7 +61,7 @@
 				gl = null;
 				
 				try {
-					gl = canvas.getContext(WebGLConstants.WEB_GL_CONTEXT_NAME) || canvas.getContext(WebGLConstants.EXPERIMENTAL_WEB_GL_CONTEXT_NAME);
+					gl = canvas.getContext(WebGlConstants.WEB_GL_CONTEXT_NAME) || canvas.getContext(WebGlConstants.EXPERIMENTAL_WEB_GL_CONTEXT_NAME);
 					
 					gl.viewportWidth = canvas.width;
 					gl.viewportHeight = canvas.height;
@@ -132,8 +132,8 @@
 				gl.linkProgram(shaderProgram);
 				
 				if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-					console.log(WebGLConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS);
-					alert(WebGLConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS);
+					console.log(WebGlConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS);
+					alert(WebGlConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS);
 				}
 				
 				// Use the program
