@@ -3,26 +3,6 @@
 		<!-- Import required dependencies -->
 		<script src="../lib/require.js" data-main="../lib/imports.js" ></script>
 
-		<!-- FRAGMENT SHADER -->
-		<script id="shader-fs" type="x-shader/x-fragment" >
-			precision mediump float;
-			void main(void) {
-				gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-			}
-		</script>
-
-		<!-- VERTEX SHADER -->
-		<script id="shader-vs" type="x-shader/x-vertex" >
-			attribute vec3 aVertexPosition;
-
-			uniform mat4 uMVMatrix;
-			uniform mat4 uPMatrix;
-
-			void main(void) {
-				gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-			}
-		</script>
-
 		<script type="text/javascript" >
 			var gl;// Global variable holding WebGL context
 			
@@ -36,7 +16,7 @@
 				gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 			}
 			
-			function start() {
+			function start(config) {
 				mvMatrix = mat4.create();
 				pMatrix = mat4.create();
 
@@ -45,7 +25,7 @@
 				
 				gl = initWebGL(canvas);
 				
-				initPrograms();
+				initPrograms(config);
 				initBuffers();
 				
 				// Only continue if gl was initialized
@@ -84,34 +64,19 @@
 			}
 
 			// Retrieve shader
-			function getShader(gl, scriptId) {
-				var shaderScript = document.getElementById(scriptId);
-				if(!shaderScript) {
-					console.log('No shaderScript by ' + scriptId);
-					return null;
-				}
-
-				var str = "";
-				var k = shaderScript.firstChild;
-				while(k) {
-					if(k.nodeType === 3){
-						str += k.textContent;
-					}
-					k = k.nextSibling;
-				}
-
+			function getShader(gl, shaderObj) {
 				var shader;
-				if(shaderScript.type == "x-shader/x-fragment") {
+				if(shaderObj.type == "FRAGMENT") {
 					shader = gl.createShader(gl.FRAGMENT_SHADER);
 				}
-				else if (shaderScript.type == "x-shader/x-vertex") {
+				else if (shaderObj.type == "VERTEX") {
 					shader = gl.createShader(gl.VERTEX_SHADER);
 				}
 				else {
 					return null;
 				}
 
-				gl.shaderSource(shader, str);
+				gl.shaderSource(shader, shaderObj.src);
 				gl.compileShader(shader);
 
 				if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -125,9 +90,9 @@
 			
 			// Initialize shader program
 			var shaderProgram;
-			function initPrograms() {
-				var fragmentShader = getShader(gl, "shader-fs");
-				var vertexShader = getShader(gl, "shader-vs");
+			function initPrograms(config) {
+				var fragmentShader = getShader(gl, config.fragmentShader);
+				var vertexShader = getShader(gl, config.vertexShader);
 				
 				shaderProgram = gl.createProgram();
 				gl.attachShader(shaderProgram, fragmentShader);
