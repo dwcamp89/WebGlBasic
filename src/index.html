@@ -1,7 +1,7 @@
 <html>
-	<body onload="start()">
-		<script src="../lib/WebGlConstants.js" ></script>
-		<script src="../lib/glMatrix-0.9.5.min.js" ></script>
+	<body>
+		<!-- Import required dependencies -->
+		<script src="../lib/require.js" data-main="../lib/imports.js" ></script>
 
 		<!-- FRAGMENT SHADER -->
 		<script id="shader-fs" type="x-shader/x-fragment" >
@@ -27,8 +27,8 @@
 			var gl;// Global variable holding WebGL context
 			
 			// Global matrices (move elsewhere later?)
-			var mvMatrix = mat4.create(); // model view matrix
-			var pMatrix = mat4.create();
+			var mvMatrix;
+			var pMatrix;
 			
 			// Push the mvMatrix and pMatrix to the graphics card
 			function setMatrixUniforms() {
@@ -37,6 +37,9 @@
 			}
 			
 			function start() {
+				mvMatrix = mat4.create();
+				pMatrix = mat4.create();
+
 				// Get the canvas by ID
 				var canvas = document.getElementById(WebGlConstants.CANVAS_ID);
 				
