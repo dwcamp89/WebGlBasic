@@ -1,5 +1,5 @@
-if !window.WebGlConstants?
-	window.WebGlConstants = {
+define [], ->
+	{
 		'WEB_GL_CONTEXT_NAME' : 'webgl',
 		'EXPERIMENTAL_WEB_GL_CONTEXT_NAME' : 'experimental-webgl',
 		'CANVAS_ID' : 'theCanvas', # Id of the canvas element to be used
