@@ -50,7 +50,7 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		gl.compileShader newShader
 
 		if !gl.getShaderParameter newShader, gl.COMPILE_STATUS
-			alert gl.getShaderInfoLog shader
+			alert gl.getShaderInfoLog newShader
 			console.log gl.getShaderInfoLog newShader
 			return null
 
