@@ -33,29 +33,29 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 
 	# Retrieve shader
 	getShader = (shaderObj) ->
-		shader = null
+		newShader = null
 		if shaderObj.type == "FRAGMENT"
-			shader = gl.createShader gl.FRAGMENT_SHADER
+			newShader = gl.createShader gl.FRAGMENT_SHADER
 		else if shaderObj.type == "VERTEX"
-			shader = gl.createShader gl.VERTEX_SHADER
+			newShader = gl.createShader gl.VERTEX_SHADER
 		else
 			return null
 
-		gl.shaderSource shader, shaderObj.src
-		gl.compileShader shader
+		gl.shaderSource newShader, shaderObj.src
+		gl.compileShader newShader
 
-		if !gl.getShaderParameter shader, gl.COMPILE_STATUS
+		if !gl.getShaderParameter newShader, gl.COMPILE_STATUS
 			alert gl.getShaderInfoLog shader
-			console.log gl.getShaderInfoLog shader
+			console.log gl.getShaderInfoLog newShader
 			return null
 
 		# return the shader
-		shader
+		newShader
 
 	# Helper method to init shader programs
-	initPrograms = (config) ->
-		fragmentShader = getShader config.fragmentShader
-		vertexShader = getShader config.vertexShader
+	initPrograms = ->
+		fragmentShader = getShader shader.fragment
+		vertexShader = getShader shader.vertex
 		
 		shaderProgram = gl.createProgram()
 
@@ -136,7 +136,7 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		gl.drawArrays gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numberOfItems
 
 	# START
-	start = (config) ->
+	start = ->
 		mvMatrix = mat4.create()
 		pMatrix = mat4.create()
 
@@ -145,7 +145,7 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		
 		gl = initWebGL canvas
 		
-		initPrograms config
+		initPrograms()
 		initBuffers()
 		
 		# Only continue if gl was initialized
@@ -157,8 +157,5 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		
 		drawScene()
 
-	config = {
-		vertexShader : shader.vertex
-		fragmentShader : shader.fragment
-	}
-	start(config)
+	# Entry point
+	start()
