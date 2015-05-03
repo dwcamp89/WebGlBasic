@@ -1,19 +1,24 @@
 # Required JS libraries should be "imported" here by adding to the array
 require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMatrix, webGlUtils, webGlConstants, shader)->
 
+	# Handle to gl context object
+	gl = null
+
+	# Model matrices
 	mvMatrix = null
 	pMatrix = null
+
+	# Shapes
 	triangleVertexPositionBuffer = null
 	squareVertexPositionBuffer = null
+
+	# Shader program and shaders
 	shaderProgram = null
-	gl = null
 	vertexShader = null
 	fragmentShader = null
 
 	# Helper method to initialize GL object
 	initWebGL = (canvas) ->
-		gl = null
-				
 		try
 			gl = canvas.getContext webGlConstants.WEB_GL_CONTEXT_NAME
 			gl = gl ? (canvas.getContext webGlConstants.EXPERIMENTAL_WEB_GL_CONTEXT_NAME)

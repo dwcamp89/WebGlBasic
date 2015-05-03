@@ -51,7 +51,7 @@ task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
 
 	# Write shader src code into define file (double quotes required to use coffee string replace)
 	shaderSrc = "
-		define([], function() {
+		define(function() {
 			return {
 				fragment : {
 					src : '#{fragmentSrc}',
