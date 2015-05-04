@@ -10,7 +10,9 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 
 	# Shapes
 	triangleVertexPositionBuffer = null
+	triangleVertexColorBuffer = null
 	squareVertexPositionBuffer = null
+	squareVertexColorBuffer = null
 
 	# Shader program and shaders
 	shaderProgram = null
@@ -79,6 +81,9 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		shaderProgram.vertexPositionAttribute = gl.getAttribLocation shaderProgram, "aVertexPosition"
 		gl.enableVertexAttribArray shaderProgram.vertexPositionAttribute
 		
+		shaderProgram.vertexColorAttribute = gl.getAttribLocation shaderProgram, "aVertexColor"
+		gl.enableVertexAttribArray shaderProgram.vertexColorAttribute
+
 		shaderProgram.pMatrixUniform = gl.getUniformLocation shaderProgram, "uPMatrix"
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation shaderProgram, "uMVMatrix"
 
@@ -99,6 +104,19 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		# Set vertices metadata
 		triangleVertexPositionBuffer.itemSize = 3
 		triangleVertexPositionBuffer.numberOfItems = 3
+
+		# Set triangle color
+		triangleVertexColorBuffer = gl.createBuffer()
+		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexColorBuffer
+		colors = [
+			1.0, 0.0, 0.0, 1.0
+			0.0, 1.0, 0.0, 1.0
+			0.0, 0.0, 1.0, 1.0
+		]
+
+		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW
+		triangleVertexColorBuffer.itemSize = 4
+		triangleVertexColorBuffer.numberOfItems = 3
 		
 		squareVertexPositionBuffer = gl.createBuffer()
 		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexPositionBuffer
@@ -114,6 +132,21 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		squareVertexPositionBuffer.itemSize = 3
 		squareVertexPositionBuffer.numberOfItems = 4
 
+		# Set square color
+		squareVertexColorBuffer = gl.createBuffer()
+		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexColorBuffer
+
+		colors = [
+			0.5, 0.5, 1.0, 0.5
+			0.5, 0.5, 1.0, 1.0
+			0.5, 0.5, 1.0, 1.0
+			0.5, 0.5, 1.0, 1.0
+		]
+
+		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW
+		squareVertexColorBuffer.itemSize = 4
+		squareVertexColorBuffer.numberOfItems = 4
+
 	setMatrixUniforms = ->
 		gl.uniformMatrix4fv shaderProgram.pMatrixUniform, false, pMatrix
 		gl.uniformMatrix4fv shaderProgram.mvMatrixUniform, false, mvMatrix
@@ -127,16 +160,30 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		mat4.identity mvMatrix # Move camera to center
 		mat4.translate mvMatrix, [-1.5, 0.0, -7.0]
 
+		# Set triangle vertices
 		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexPositionBuffer
 		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+		
+		# Set triangle colors
+		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexColorBuffer
+		gl.vertexAttribPointer shaderProgram.vertexColorAttribute, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0
+
+		# Draw triangle
 		setMatrixUniforms()
 		gl.drawArrays gl.TRIANGLES, 0, triangleVertexPositionBuffer.numberOfItems
 
 		# Move camera
 		mat4.translate mvMatrix, [3.0, 0.0, 0.0]
 
+		# Set square vertices
 		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexPositionBuffer
 		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+		
+		# Set square colors
+		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexColorBuffer
+		gl.vertexAttribPointer shaderProgram.vertexColorAttribute, squareVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0
+
+		# Draw square
 		setMatrixUniforms()
 		gl.drawArrays gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numberOfItems
 

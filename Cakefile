@@ -27,7 +27,7 @@ task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
 	console.log 'Copy shader source code to shader module'
 
 	# Read fragment shader into buffer
-	fragmentShaderFileName = 'basic.frag'
+	fragmentShaderFileName = 'basic2.frag'
 	try
 		fragmentShaderSrcBuffer = fs.readFileSync "lib/shaders/#{fragmentShaderFileName}"
 	catch error
@@ -39,7 +39,7 @@ task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
 
 
 	# Read vertex shader into buffer
-	vertexShaderFileName = 'basic.vert'
+	vertexShaderFileName = 'basic2.vert'
 	try
 		vertexShaderSrcBuffer = fs.readFileSync "lib/shaders/#{vertexShaderFileName}"
 	catch error
