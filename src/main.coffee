@@ -7,17 +7,34 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 	# Model matrices
 	mvMatrix = null
 	pMatrix = null
+	mvMatrixStack = []
 
 	# Shapes
 	triangleVertexPositionBuffer = null
 	triangleVertexColorBuffer = null
+	rTri = null;
 	squareVertexPositionBuffer = null
 	squareVertexColorBuffer = null
+	rSquare = null
 
 	# Shader program and shaders
 	shaderProgram = null
 	vertexShader = null
 	fragmentShader = null
+
+	mvPushMatrix = ->
+		copy = mat4.create()
+		mat4.set mvMatrix, copy
+		mvMatrixStack.push copy
+
+	mvPopMatrix = ->
+		if mvMatrixStack.size == 0
+			throw "Invalid Pop Matrix"
+		mvMatrix = mvMatrixStack.pop()
+
+	degToRad = (degrees) ->
+		return degrees * Math.PI / 180.0
+
 
 	# Helper method to initialize GL object
 	initWebGL = (canvas) ->
@@ -160,6 +177,9 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		mat4.identity mvMatrix # Move camera to center
 		mat4.translate mvMatrix, [-1.5, 0.0, -7.0]
 
+		mvPushMatrix()
+		mat4.rotate mvMatrix, degToRad(rTri), [0, 1, 0]
+
 		# Set triangle vertices
 		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexPositionBuffer
 		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
@@ -172,8 +192,13 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		setMatrixUniforms()
 		gl.drawArrays gl.TRIANGLES, 0, triangleVertexPositionBuffer.numberOfItems
 
+		mvPopMatrix()
+
 		# Move camera
 		mat4.translate mvMatrix, [3.0, 0.0, 0.0]
+
+		mvPushMatrix()
+		mat4.rotate mvMatrix, degToRad(rSquare), [1, 0, 0]
 
 		# Set square vertices
 		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexPositionBuffer
@@ -186,6 +211,26 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		# Draw square
 		setMatrixUniforms()
 		gl.drawArrays gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numberOfItems
+
+		mvPopMatrix()
+
+
+	# Animate
+	lastTime = 0
+	animate = ->
+		timeNow = new Date().getTime()
+		if lastTime != 0
+			elapsed = timeNow - lastTime
+			rTri += 90 * elapsed / 1000.0
+			rSquare += 75 * elapsed / 1000.0
+		lastTime = timeNow
+
+
+	# Tick for animation
+	tick = ->
+		requestAnimFrame(tick)
+		drawScene()
+		animate()
 
 	# START
 	start = ->
@@ -207,7 +252,8 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 			gl.depthFunc gl.LEQUAL
 			gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
 		
-		drawScene()
+		#drawScene()
+		tick()
 
 	# Entry point
 	start()

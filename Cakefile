@@ -18,12 +18,8 @@ build = (callback) ->
 		process.exit()
 	coffee.on 'exit', (code) ->
 		callback?() if code is 0
-	
-task 'build', 'Generic build lib/ from src/', ->
-	build()
 
-
-task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
+buildShaders = ->	
 	console.log 'Copy shader source code to shader module'
 
 	# Read fragment shader into buffer
@@ -67,3 +63,22 @@ task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
 
 	# Write the shader src to shader.js
 	fs.writeFileSync 'lib/shader.js', shaderSrc
+	
+task 'build', 'Generic build lib/ from src/', ->
+	build()
+
+
+task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
+	buildShaders()
+
+task 'buildAll', 'Build lib and shaders.', ->
+	build()
+	buildShaders()
+
+task 'watch', 'Watch for changes and build shaders and lib folder', (callback)->
+	coffee = exec 'coffee --watch --compile --output lib src'
+
+	coffee.stderr.on 'data', (data) ->
+		process.stderr.write data.toString()
+	coffee.stdout.on 'data', (data) ->
+		console.log data.toString()
