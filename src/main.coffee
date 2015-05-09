@@ -12,10 +12,19 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 	# Shapes
 	triangleVertexPositionBuffer = null
 	triangleVertexColorBuffer = null
-	rTri = null;
+	rTri = null
 	squareVertexPositionBuffer = null
 	squareVertexColorBuffer = null
 	rSquare = null
+
+	# 3d shapes
+	pyramidVertexPositionBuffer = null
+	pyramidVertexColorBuffer = null
+	rPyramid = 0
+	cubeVertexPositionBuffer = null
+	cubeVertexColorBuffer = null
+	cubeVertexIndexBuffer = null
+	rCube = 0
 
 	# Shader program and shaders
 	shaderProgram = null
@@ -106,63 +115,150 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 
 	# Helper method to initialize shape buffers
 	initBuffers = ->
-		# Init triangle
-		triangleVertexPositionBuffer = gl.createBuffer()
+		# Init pyramid position buffer
+		pyramidVertexPositionBuffer = gl.createBuffer()
 
-		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexPositionBuffer
+		gl.bindBuffer gl.ARRAY_BUFFER, pyramidVertexPositionBuffer
 		vertices = [
-			0.0, 1.0, 0.0
-			-1.0, -1.0, 0.0
-			1.0, -1.0, 0.0
-		]
+	        # Front face
+	         0.0,  1.0,  0.0
+	        -1.0, -1.0,  1.0
+	         1.0, -1.0,  1.0
+	        # Right face
+	         0.0,  1.0,  0.0
+	         1.0, -1.0,  1.0
+	         1.0, -1.0, -1.0
+	        # Back face
+	         0.0,  1.0,  0.0
+	         1.0, -1.0, -1.0
+	        -1.0, -1.0, -1.0
+	        # Left face
+	         0.0,  1.0,  0.0
+	        -1.0, -1.0, -1.0
+	        -1.0, -1.0,  1.0
+	    ]
 		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW
 
-		
-		# Set vertices metadata
-		triangleVertexPositionBuffer.itemSize = 3
-		triangleVertexPositionBuffer.numberOfItems = 3
+		# Set buffer metadata
+		pyramidVertexPositionBuffer.itemSize = 3
+		pyramidVertexPositionBuffer.numberOfItems = 12
 
-		# Set triangle color
-		triangleVertexColorBuffer = gl.createBuffer()
-		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexColorBuffer
+		# Set pyramid color buffer
+		pyramidVertexColorBuffer = gl.createBuffer()
+		gl.bindBuffer gl.ARRAY_BUFFER, pyramidVertexColorBuffer
 		colors = [
-			1.0, 0.0, 0.0, 1.0
-			0.0, 1.0, 0.0, 1.0
-			0.0, 0.0, 1.0, 1.0
-		]
-
+	        # Front face
+	        1.0, 0.0, 0.0, 1.0
+	        0.0, 1.0, 0.0, 1.0
+	        0.0, 0.0, 1.0, 1.0
+	        # Right face
+	        1.0, 0.0, 0.0, 1.0
+	        0.0, 0.0, 1.0, 1.0
+	        0.0, 1.0, 0.0, 1.0
+	        # Back face
+	        1.0, 0.0, 0.0, 1.0
+	        0.0, 1.0, 0.0, 1.0
+	        0.0, 0.0, 1.0, 1.0
+	        # Left face
+	        1.0, 0.0, 0.0, 1.0
+	        0.0, 0.0, 1.0, 1.0
+	        0.0, 1.0, 0.0, 1.0
+	    ];
 		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW
-		triangleVertexColorBuffer.itemSize = 4
-		triangleVertexColorBuffer.numberOfItems = 3
-		
-		squareVertexPositionBuffer = gl.createBuffer()
-		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexPositionBuffer
+
+		# Set buffer metadata
+		pyramidVertexColorBuffer.itemSize = 4
+		pyramidVertexColorBuffer.numberOfItems = 12
+
+
+		# Cube vertices
+		cubeVertexPositionBuffer = gl.createBuffer()
+		gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexPositionBuffer
 		vertices = [
-			1.0,  1.0,  0.0
-			-1.0,  1.0,  0.0
-			1.0, -1.0,  0.0
-			-1.0, -1.0,  0.0
-		]
-		
+	      # Front face
+	      -1.0, -1.0,  1.0
+	       1.0, -1.0,  1.0
+	       1.0,  1.0,  1.0
+	      -1.0,  1.0,  1.0
+
+	      # Back face
+	      -1.0, -1.0, -1.0
+	      -1.0,  1.0, -1.0
+	       1.0,  1.0, -1.0
+	       1.0, -1.0, -1.0
+
+	      # Top face
+	      -1.0,  1.0, -1.0
+	      -1.0,  1.0,  1.0
+	       1.0,  1.0,  1.0
+	       1.0,  1.0, -1.0
+
+	      # Bottom face
+	      -1.0, -1.0, -1.0
+	       1.0, -1.0, -1.0
+	       1.0, -1.0,  1.0
+	      -1.0, -1.0,  1.0
+
+	      # Right face
+	       1.0, -1.0, -1.0
+	       1.0,  1.0, -1.0
+	       1.0,  1.0,  1.0
+	       1.0, -1.0,  1.0
+
+	      # Left face
+	      -1.0, -1.0, -1.0
+	      -1.0, -1.0,  1.0
+	      -1.0,  1.0,  1.0
+	      -1.0,  1.0, -1.0
+	    ];
 		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW
 		
-		squareVertexPositionBuffer.itemSize = 3
-		squareVertexPositionBuffer.numberOfItems = 4
+		# Set buffer metadata
+		cubeVertexPositionBuffer.itemSize = 3
+		cubeVertexPositionBuffer.numberOfItems = 24
 
-		# Set square color
-		squareVertexColorBuffer = gl.createBuffer()
-		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexColorBuffer
 
+		# Set cube color
+		cubeVertexColorBuffer = gl.createBuffer()
+		gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexColorBuffer
 		colors = [
-			0.5, 0.5, 1.0, 0.5
-			0.5, 0.5, 1.0, 1.0
-			0.5, 0.5, 1.0, 1.0
-			0.5, 0.5, 1.0, 1.0
+			[1.0, 0.0, 0.0, 1.0]     # Front face
+			[1.0, 1.0, 0.0, 1.0]     # Back face
+			[0.0, 1.0, 0.0, 1.0]     # Top face
+			[1.0, 0.5, 0.5, 1.0]     # Bottom face
+			[1.0, 0.0, 1.0, 1.0]     # Right face
+			[0.0, 0.0, 1.0, 1.0]     # Left face
 		]
 
-		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW
-		squareVertexColorBuffer.itemSize = 4
-		squareVertexColorBuffer.numberOfItems = 4
+		# unpack colors
+		unpackedColors = []
+		for colorList in colors
+			for j in [0, 1, 2, 3]
+				unpackedColors = unpackedColors.concat colorList
+
+		gl.bufferData gl.ARRAY_BUFFER, new Float32Array(unpackedColors), gl.STATIC_DRAW
+
+		# Set buffer metadata
+		cubeVertexColorBuffer.itemSize = 4
+		cubeVertexColorBuffer.numberOfItems = 24
+
+		# Cube indeces
+		cubeVertexIndexBuffer = gl.createBuffer()
+		gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer
+
+		vertices = [
+			0, 1, 2,      0, 2, 3     # Front face
+		    4, 5, 6,      4, 6, 7     # Back face
+		    8, 9, 10,     8, 10, 11   # Top face
+		    12, 13, 14,   12, 14, 15  # Bottom face
+		    16, 17, 18,   16, 18, 19  # Right face
+		    20, 21, 22,   20, 22, 23  # Left face
+		]
+		gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertices), gl.STATIC_DRAW
+
+		# Set buffer metadata
+		cubeVertexIndexBuffer.itemSize = 3
+		cubeVertexIndexBuffer.numberOfItems = 36
 
 	setMatrixUniforms = ->
 		gl.uniformMatrix4fv shaderProgram.pMatrixUniform, false, pMatrix
@@ -178,19 +274,19 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		mat4.translate mvMatrix, [-1.5, 0.0, -7.0]
 
 		mvPushMatrix()
-		mat4.rotate mvMatrix, degToRad(rTri), [0, 1, 0]
+		mat4.rotate mvMatrix, degToRad(rPyramid), [1, 0, 0]
 
-		# Set triangle vertices
-		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexPositionBuffer
-		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+		# Set pyramid vertices
+		gl.bindBuffer gl.ARRAY_BUFFER, pyramidVertexPositionBuffer
+		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, pyramidVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
 		
-		# Set triangle colors
-		gl.bindBuffer gl.ARRAY_BUFFER, triangleVertexColorBuffer
-		gl.vertexAttribPointer shaderProgram.vertexColorAttribute, triangleVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0
+		# Set pyramid colors
+		gl.bindBuffer gl.ARRAY_BUFFER, pyramidVertexColorBuffer
+		gl.vertexAttribPointer shaderProgram.vertexColorAttribute, pyramidVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0
 
-		# Draw triangle
+		# Draw pyramid
 		setMatrixUniforms()
-		gl.drawArrays gl.TRIANGLES, 0, triangleVertexPositionBuffer.numberOfItems
+		gl.drawArrays gl.TRIANGLES, 0, pyramidVertexPositionBuffer.numberOfItems
 
 		mvPopMatrix()
 
@@ -198,19 +294,22 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		mat4.translate mvMatrix, [3.0, 0.0, 0.0]
 
 		mvPushMatrix()
-		mat4.rotate mvMatrix, degToRad(rSquare), [1, 0, 0]
+		mat4.rotate mvMatrix, degToRad(rCube), [1, 1, 1]
 
-		# Set square vertices
-		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexPositionBuffer
-		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+		# Set cube vertices
+		gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexPositionBuffer
+		gl.vertexAttribPointer shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
 		
-		# Set square colors
-		gl.bindBuffer gl.ARRAY_BUFFER, squareVertexColorBuffer
-		gl.vertexAttribPointer shaderProgram.vertexColorAttribute, squareVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0
+		# Set cube colors
+		gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexColorBuffer
+		gl.vertexAttribPointer shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0
 
-		# Draw square
+		# Set cube indeces
+		gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer
+
+		# Draw cube
 		setMatrixUniforms()
-		gl.drawArrays gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numberOfItems
+		gl.drawElements gl.TRIANGLES, cubeVertexIndexBuffer.numberOfItems, gl.UNSIGNED_SHORT, 0
 
 		mvPopMatrix()
 
@@ -221,8 +320,8 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		timeNow = new Date().getTime()
 		if lastTime != 0
 			elapsed = timeNow - lastTime
-			rTri += 90 * elapsed / 1000.0
-			rSquare += 75 * elapsed / 1000.0
+			rPyramid += 90 * elapsed / 1000.0
+			rCube += 90 * elapsed / 1000.0
 		lastTime = timeNow
 
 
