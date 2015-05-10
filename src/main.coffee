@@ -1,21 +1,10 @@
 # Required JS libraries should be "imported" here by adding to the array
-require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMatrix, webGlUtils, webGlConstants, shader)->
-
-	# Handle to gl context object
-	gl = null
+require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'shaderProgram'], (glMatrix, webGlUtils, webGlConstants, gl, shaderProgram)->
 
 	# Model matrices
 	mvMatrix = null
 	pMatrix = null
 	mvMatrixStack = []
-
-	# Shapes
-	triangleVertexPositionBuffer = null
-	triangleVertexColorBuffer = null
-	rTri = null
-	squareVertexPositionBuffer = null
-	squareVertexColorBuffer = null
-	rSquare = null
 
 	# 3d shapes
 	pyramidVertexPositionBuffer = null
@@ -25,11 +14,6 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 	cubeVertexColorBuffer = null
 	cubeVertexIndexBuffer = null
 	rCube = 0
-
-	# Shader program and shaders
-	shaderProgram = null
-	vertexShader = null
-	fragmentShader = null
 
 	mvPushMatrix = ->
 		copy = mat4.create()
@@ -43,75 +27,6 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 
 	degToRad = (degrees) ->
 		return degrees * Math.PI / 180.0
-
-
-	# Helper method to initialize GL object
-	initWebGL = (canvas) ->
-		try
-			gl = canvas.getContext webGlConstants.WEB_GL_CONTEXT_NAME
-			gl = gl ? (canvas.getContext webGlConstants.EXPERIMENTAL_WEB_GL_CONTEXT_NAME)
-			gl.viewportWidth = canvas.width
-			gl.viewportHeight = canvas.height
-		catch error
-			console.log 'error initializing webgl'
-			console.log e.message
-		
-		# If gl was not successfully initialized, give up
-		if !gl
-			alert 'Unable to initialize WebGL. Your browser may not support it.'
-			gl = null;
-		
-		# Return the gl object
-		gl
-
-	# Retrieve shader
-	getShader = (shaderObj) ->
-		newShader = null
-		if shaderObj.type == "FRAGMENT"
-			newShader = gl.createShader gl.FRAGMENT_SHADER
-		else if shaderObj.type == "VERTEX"
-			newShader = gl.createShader gl.VERTEX_SHADER
-		else
-			return null
-
-		gl.shaderSource newShader, shaderObj.src
-		gl.compileShader newShader
-
-		if !gl.getShaderParameter newShader, gl.COMPILE_STATUS
-			alert gl.getShaderInfoLog newShader
-			console.log gl.getShaderInfoLog newShader
-			return null
-
-		# return the shader
-		newShader
-
-	# Helper method to init shader programs
-	initPrograms = ->
-		fragmentShader = getShader shader.fragment
-		vertexShader = getShader shader.vertex
-		
-		shaderProgram = gl.createProgram()
-
-		gl.attachShader shaderProgram, fragmentShader
-		gl.attachShader shaderProgram, vertexShader
-		gl.linkProgram shaderProgram
-		
-		if !gl.getProgramParameter shaderProgram, gl.LINK_STATUS
-			console.log webGlConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS
-			alert webGlConstants.ERROR_MESSAGES.UNABLE_TO_INITIALIZE_SHADERS
-		
-		# Use the program
-		gl.useProgram shaderProgram
-		
-		# 
-		shaderProgram.vertexPositionAttribute = gl.getAttribLocation shaderProgram, "aVertexPosition"
-		gl.enableVertexAttribArray shaderProgram.vertexPositionAttribute
-		
-		shaderProgram.vertexColorAttribute = gl.getAttribLocation shaderProgram, "aVertexColor"
-		gl.enableVertexAttribArray shaderProgram.vertexColorAttribute
-
-		shaderProgram.pMatrixUniform = gl.getUniformLocation shaderProgram, "uPMatrix"
-		shaderProgram.mvMatrixUniform = gl.getUniformLocation shaderProgram, "uMVMatrix"
 
 	# Helper method to initialize shape buffers
 	initBuffers = ->
@@ -223,10 +138,10 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 		gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexColorBuffer
 		colors = [
 			[1.0, 0.0, 0.0, 1.0]     # Front face
-			[1.0, 1.0, 0.0, 1.0]     # Back face
+			[1.0, 0.5, 0.0, 1.0]     # Back face
 			[0.0, 1.0, 0.0, 1.0]     # Top face
 			[1.0, 0.5, 0.5, 1.0]     # Bottom face
-			[1.0, 0.0, 1.0, 1.0]     # Right face
+			[0.75, 0.0, 1.0, 1.0]     # Right face
 			[0.0, 0.0, 1.0, 1.0]     # Left face
 		]
 
@@ -335,13 +250,7 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'shader'], (glMa
 	start = ->
 		mvMatrix = mat4.create()
 		pMatrix = mat4.create()
-
-		# Get the canvas by ID
-		canvas = document.getElementById webGlConstants.CANVAS_ID
 		
-		gl = initWebGL canvas
-		
-		initPrograms()
 		initBuffers()
 		
 		# Only continue if gl was initialized
