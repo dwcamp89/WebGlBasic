@@ -19,56 +19,47 @@ build = (callback) ->
 	coffee.on 'exit', (code) ->
 		callback?() if code is 0
 
-buildShaders = ->	
-	console.log 'Copy shader source code to shader module'
 
-	# Read fragment shader into buffer
-	fragmentShaderFileName = 'basic2.frag'
+# Get the shader source code
+getShaderSrc = (shaderFileName)->
+	# Read the file synchronously
 	try
-		fragmentShaderSrcBuffer = fs.readFileSync "lib/shaders/#{fragmentShaderFileName}"
+		shaderSrcBuffer = fs.readFileSync "lib/shaders/#{shaderFileName}"
 	catch error
-		console.log 'No fragment shader found. Using basic.frag instead.'
-		fragmentShaderSrcBuffer = fs.readFileSync 'lib/shaders/basic.frag'
+		console.log "No shader found by name #{shaderFileName}"
 
 	# Get src as string from buffer (replace all line returns)
-	fragmentSrc = fragmentShaderSrcBuffer.toString().replace /(\r\n|\r|\n)/g, ''
+	shaderSrcCode = shaderSrcBuffer.toString().replace /(\r\n|\r|\n)/g, ''
+	return  shaderSrcCode
 
+buildShaders = ->
+	console.log 'buildShaders2'
+	shaderSrcMap = {}
 
-	# Read vertex shader into buffer
-	vertexShaderFileName = 'basic2.vert'
-	try
-		vertexShaderSrcBuffer = fs.readFileSync "lib/shaders/#{vertexShaderFileName}"
-	catch error
-		console.log 'No vertex shader found. Using basic.vert instead.'
-		vertexShaderSrcBuffer = fs.readFileSync 'lib/shaders/basic.vert'
+	# TODO - determine list dynamically from lib/shaders
+	shaderFileNames = ['basic.vert', 'basic.frag', 'basic2.vert', 'basic2.frag', 'texture.vert', 'texture.frag']
 
-	# Get src as string from buffer (replace all line returns)
-	vertexSrc = vertexShaderSrcBuffer.toString().replace /(\r\n|\r|\n)/g, ''
+	# Iterate through all shader files, adding the source code to shaderSrcs map object
+	shaderSrcMap[shaderFileName] = getShaderSrc(shaderFileName) for shaderFileName in shaderFileNames
 
-	# Write shader src code into define file (double quotes required to use coffee string replace)
-	shaderSrc = "
+	console.log shaderSrcMap
+	# Turn shaderSrcs JS object into a string
+	shaderSrcsString = JSON.stringify(shaderSrcMap)
+
+	shaderSrcsJs = "
 		define(function() {
-			return {
-				fragment : {
-					src : '#{fragmentSrc}',
-					type : 'FRAGMENT'
-				},
-				vertex : {
-					src : '#{vertexSrc}',
-					type : 'VERTEX'
-				}
-			};
+			return #{shaderSrcsString}
 		});
 	"
 
-	# Write the shader src to shader.js
-	fs.writeFileSync 'lib/shader.js', shaderSrc
+
+	fs.writeFileSync 'lib/shaderSrcs.js', shaderSrcsJs
+
 	
 task 'build', 'Generic build lib/ from src/', ->
 	build()
 
-
-task 'buildShaders', 'Build shader src into requirejs module shader.js', ->
+task 'buildShaders', 'Build shader src into requirejs module shaderSrcs.js', ->
 	buildShaders()
 
 task 'buildAll', 'Build lib and shaders.', ->
