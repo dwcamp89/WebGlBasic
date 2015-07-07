@@ -39,7 +39,9 @@ define ['gl', 'shaderSrcs'], (gl, shaderSrcs)->
 
 		# Check the compile status of the fragment shader
 		if !gl.getShaderParameter fragmentShader, gl.COMPILE_STATUS
+			console.log gl.getShaderParameter fragmentShader, gl.COMPILE_STATUS
 			console.log "Unable to compile fragment shader #{fragmentShaderName}."
+			console.log gl.getShaderInfoLog fragmentShader
 			return programInstance
 
 		gl.attachShader shaderProgram, vertexShader

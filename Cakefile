@@ -37,7 +37,7 @@ buildShaders = ->
 	shaderSrcMap = {}
 
 	# TODO - determine list dynamically from lib/shaders
-	shaderFileNames = ['basic.vert', 'basic.frag', 'basic2.vert', 'basic2.frag', 'texture.vert', 'texture.frag']
+	shaderFileNames = ['basic.vert', 'basic.frag', 'basic2.vert', 'basic2.frag', 'texture.vert', 'texture.frag', 'light1.vert', 'light1.frag']
 
 	# Iterate through all shader files, adding the source code to shaderSrcs map object
 	shaderSrcMap[shaderFileName] = getShaderSrc(shaderFileName) for shaderFileName in shaderFileNames
