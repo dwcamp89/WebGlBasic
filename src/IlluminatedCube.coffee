@@ -20,6 +20,12 @@ define ['gl', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'Sha
 			# Init lighting flag
 			@useLighting = true
 
+			# Init blending flag
+			@useBlending = false
+
+			# Init alpha value
+			@alpha = 1.0
+
 			# Init light colors
 			@ambientColor = [1.0, 1.0, 1.0]
 			@directionalColor = [0.75, 0.5, 0.0]
@@ -54,6 +60,7 @@ define ['gl', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'Sha
 			@shaderProgram.directionLightingColorUniform = gl.getUniformLocation @shaderProgram.program, 'uDirectionalLightingColor'
 			@shaderProgram.normalMatrixUniform = gl.getUniformLocation @shaderProgram.program, 'uNormalMatrix'
 			@shaderProgram.ambientColorUniform = gl.getUniformLocation @shaderProgram.program, 'uAmbientColor'
+			@shaderProgram.alphaUniform = gl.getUniformLocation @shaderProgram.program, 'uAlpha'
 
 			# Init crateTexture
 			@crateTexture = gl.createTexture()
@@ -61,7 +68,7 @@ define ['gl', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'Sha
 			@crateTexture.image = crateImage
 			crateImage.onload = ()=>
 				handleLoadedTexture(@crateTexture)
-			crateImage.src = 'images/crate.gif'
+			crateImage.src = 'images/glass.gif'
 
 		# Private helper method to asynchronously handle texture img after it is loaded into memory
 		handleLoadedTexture = (texture)->
@@ -261,6 +268,18 @@ define ['gl', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'Sha
 
 			# Set lighting flag
 			gl.uniform1i @shaderProgram.useLightingUniform, @useLighting
+
+			# Set alpha
+			gl.uniform1f @shaderProgram.alphaUniform, @alpha
+
+			# Set blending
+			if(@useBlending)
+				gl.disable gl.DEPTH_TEST
+				gl.enable gl.BLEND
+				gl.blendFunc gl.SRC_ALPHA, gl.ONE # Blend function
+			else
+				gl.disable gl.BLEND
+				gl.enable gl.DEPTH_TEST
 
 			# If using lighting, pass the ambient color uniform and lighting direction to the shaders
 			if(@useLighting)

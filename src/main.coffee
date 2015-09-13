@@ -1,18 +1,11 @@
 # Required JS libraries should be "imported" here by adding to the array
 require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'ShapeFactory'], (glMatrix, webGlUtils, webGlConstants, gl, ShapeFactory)->
 
-	# Colored pyramid
-	pyramid = null
-
 	# Textured cube
 	cube = null
 
 	# Helper method to initialize shape buffers
 	initBuffers = ->
-		# Initialize pyramid and buffers
-		pyramid = ShapeFactory.getShape('Pyramid')
-		pyramid.initBuffers()
-
 		# Initialize cube and buffers
 		cube = ShapeFactory.getShape('IlluminatedCube')
 		cube.initBuffers()
@@ -27,9 +20,6 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'ShapeFact
 		
 		mat4.perspective 45, gl.viewportWidth/gl.viewportHeight, 0.1, 100.0, pMatrix
 
-		# Draw pyramid
-		pyramid.render()
-
 		# Draw cube
 		cube.render()
 
@@ -41,11 +31,11 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'ShapeFact
 		if lastTime != 0
 			elapsed = timeNow - lastTime
 
-			# Rotate the pyramid
-			pyramid.yRot += (90 * elapsed) / 1000.0
-
 			# Check whether or not to use lighting
 			cube.useLighting = document.getElementById('UseLightingCheckbox').checked
+
+			# Check whether or not to use blending
+			cube.useBlending = document.getElementById('UseBlendingCheckbox').checked				
 
 			# Check the ambient color
 			cube.ambientColor[0] = document.getElementById('AmbientColorXInput').value or 0.0
@@ -61,6 +51,9 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'ShapeFact
 			cube.directionalColor[0] = document.getElementById('DirectionalLightRInput').value or 0.0
 			cube.directionalColor[1] = document.getElementById('DirectionalLightGInput').value or 0.0
 			cube.directionalColor[2] = document.getElementById('DirectionalLightBInput').value or 0.0
+
+			# Set the cube alpha value
+			cube.alpha = document.getElementById('AlphaInput').value or 1.0
 
 			# Update textured cube position
 			cube.xRot += (cube.xRotSpeed * elapsed) / 1000.0
@@ -124,11 +117,6 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'ShapeFact
 			gl.enable gl.DEPTH_TEST
 			gl.depthFunc gl.LEQUAL
 			gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
-
-		# Move the pyramid
-		pyramid.x = 3.0
-		pyramid.y = 2.0
-		pyramid.z = -10.0
 
 		# Move the cube back 8 units initially
 		cube.z = -8.0
