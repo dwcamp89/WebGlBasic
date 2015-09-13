@@ -1,4 +1,7 @@
-define ['gl', 'shaderSrcs'], (gl, shaderSrcs)->
+define ['GLContext', 'shaderSrcs'], (glContext, shaderSrcs)->
+
+	# Init handler to gl context
+	gl = glContext.getSingleton()
 
 	getInstance = (vertexShaderName, fragmentShaderName)->
 		# Initialize the shaders and program

@@ -1,4 +1,5 @@
 define ['WebGlConstants'], (webGlConstants)->
+
 	# Get the canvas by ID
 	canvas = document.getElementById webGlConstants.CANVAS_ID
 
@@ -16,6 +17,11 @@ define ['WebGlConstants'], (webGlConstants)->
 	if !gl
 		alert 'Unable to initialize WebGL. Your browser may not support it.'
 		gl = null;
+
+	# for testing, todo remove
+	gl.a = 'a'
 	
 	# Return the gl object
-	gl
+	{
+		getSingleton : ()-> return gl
+	}

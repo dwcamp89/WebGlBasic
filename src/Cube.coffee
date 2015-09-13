@@ -1,6 +1,8 @@
-define ['gl', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'ShaderProgramFactory'], (gl, mvMatrix, pMatrix, glMatrix, ShaderProgramFactory)->
+define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'ShaderProgramFactory'], (glContext, mvMatrix, pMatrix, glMatrix, ShaderProgramFactory)->
 
 	class Cube
+		# Init handler to gl context
+		gl = glContext.getSingleton()
 
 		constructor: ->
 			# Init positions

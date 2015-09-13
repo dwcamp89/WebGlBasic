@@ -1,7 +1,10 @@
 # Required JS libraries should be "imported" here by adding to the array
-require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'gl', 'ShapeFactory'], (glMatrix, webGlUtils, webGlConstants, gl, ShapeFactory)->
+require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'GLContext', 'ShapeFactory'], (glMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory)->
 
-	# Textured cube
+	# Get the gl context
+	gl = glContext.getSingleton()
+
+	# Cube object
 	cube = null
 
 	# Helper method to initialize shape buffers
