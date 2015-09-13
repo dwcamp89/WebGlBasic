@@ -1,5 +1,5 @@
 # Required JS libraries should be "imported" here by adding to the array
-require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'GLContext', 'ShapeFactory'], (glMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory)->
+require ['glMatrix-0.9.5.min', 'PerspectiveMatrix', 'webgl-utils', 'WebGlConstants', 'GLContext', 'ShapeFactory'], (glMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory)->
 
 	# Get the gl context
 	gl = glContext.getSingleton()
@@ -15,9 +15,6 @@ require ['glMatrix-0.9.5.min', 'webgl-utils', 'WebGlConstants', 'GLContext', 'Sh
 
 	# Draw the scene
 	drawScene = ->
-		if pMatrix == null
-			pMatrix = mat4.create()
-
 		gl.viewport 0, 0, gl.viewportWidth, gl.viewportHeight
 		gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
 		
