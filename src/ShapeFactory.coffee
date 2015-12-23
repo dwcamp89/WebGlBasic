@@ -1,4 +1,4 @@
-define ['Cube', 'Pyramid', 'TexturedCube', 'IlluminatedCube'], (Cube, Pyramid, TexturedCube, IlluminatedCube)->
+define ['Cube', 'Pyramid', 'TexturedCube', 'IlluminatedCube', 'Star'], (Cube, Pyramid, TexturedCube, IlluminatedCube, Star)->
 	getShape: (type)->
 		if type == 'Cube'
 			return Cube.getInstance()
@@ -8,5 +8,7 @@ define ['Cube', 'Pyramid', 'TexturedCube', 'IlluminatedCube'], (Cube, Pyramid, T
 			return TexturedCube.getInstance()
 		else if type == 'IlluminatedCube'
 			return IlluminatedCube.getInstance()
+		else if type == 'Star'
+			return Star.getInstance()
 		else
 			return null
