@@ -1,14 +1,24 @@
 define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min', 'ShaderProgramFactory'], (glContext, mvMatrix, pMatrix, glMatrix, ShaderProgramFactory)->
 
-	class Cube
+	class TexturedCube
 
 		# Init handler to gl context
 		gl = glContext.getSingleton()
 
-		FILTER_NEAREST = 0
-		FILTER_LINEAR = 1
-		FILTER_MIPMAP = 2
-		FILTERS = [FILTER_NEAREST, FILTER_LINEAR, FILTER_MIPMAP]
+		###
+			gl.NEAREST 					# 9728
+			gl.LINEAR 					# 9729
+			gl.NEAREST_MIPMAP_NEAREST 	# 9984
+			gl.LINEAR_MIPMAP_NEAREST 	# 9985
+			gl.NEAREST_MIPMAP_LINEAR 	# 9986
+			gl.LINEAR_MIPMAP_LINEAR 	# 9987
+		###
+
+		# List of minification filters
+		MIN_FILTERS = [gl.NEAREST, gl.LINEAR, gl.NEAREST_MIPMAP_NEAREST, gl.LINEAR_MIPMAP_NEAREST, gl.NEAREST_MIPMAP_LINEAR, gl.LINEAR_MIPMAP_LINEAR]
+
+		# List of magnification filters
+		MAG_FILTERS = [gl.NEAREST, gl.LINEAR]
 
 		constructor: ->
 			# Init positions
@@ -21,7 +31,9 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			@xRotSpeed = @yRotSpeed = @zRotSpeed = 10
 
 			# Filter number
-			@filter = FILTER_NEAREST
+			@filter = 0#FILTER_NEAREST # TODO - BAD?
+			@minFilter = gl.NEAREST
+			@magFilter = gl.NEAREST
 
 			# Create buffers
 			@vertexPositionBuffer = gl.createBuffer()
@@ -44,52 +56,48 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			@shaderProgram.mvMatrixUniform = gl.getUniformLocation @shaderProgram.program, 'uMVMatrix'
 			@shaderProgram.samplerUniform = gl.getUniformLocation @shaderProgram.program, 'uSampler'
 
-			# Init crateTextures to empty array
-			@crateTextures = new Array()
+			# Init crateTextures to empty map
+			@crateTextures = {}
 
 			# Init textures
 			@initTextures()
 
 		initTextures : ()->
-
 			# Create the image
 			crateImage = new Image()
 
 			i = 0
-			while i < 3
-				texture = gl.createTexture()
-				texture.image = crateImage
-				@crateTextures.push texture
+			while i < MAG_FILTERS.length
+				@crateTextures[MAG_FILTERS[i]] = {}
+				j = 0
+				while j < MIN_FILTERS.length
+					texture = gl.createTexture()
+					texture.image = crateImage
+					texture.magFilter = MAG_FILTERS[i]
+					texture.minFilter = MIN_FILTERS[j]
+					@crateTextures[MAG_FILTERS[i]][MIN_FILTERS[j]] = texture
+					j++
 				i++
 
 			crateImage.onload = ()=>
-				handleLoadedTextures(@crateTextures)
+				this.handleLoadedTextures()
 
 			crateImage.src = 'images/crate.gif'
 
 		# Private helper method to asynchronously handle texture img after it is loaded into memory
-		handleLoadedTextures = (textures)->
+		handleLoadedTextures : ()->
 			gl.pixelStorei gl.UNPACK_FLIP_Y_WEBGL, true
 
-			# 1st image uses nearest filtering
-			gl.bindTexture gl.TEXTURE_2D, textures[0]
-			gl.texImage2D gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[0].image
-			gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST
-			gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST
+			for magFilter, textureList of @crateTextures
+				for minFilter, texture of @crateTextures[magFilter]
+					gl.bindTexture gl.TEXTURE_2D, texture
+					gl.texImage2D gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image
+					gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, texture.magFilter
+					gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, texture.minFilter
+					if (texture.minFilter != gl.NEAREST && texture.minFilter != gl.LINEAR) 
+						gl.generateMipmap gl.TEXTURE_2D
 
-			# 2nd image uses linear filtering
-			gl.bindTexture gl.TEXTURE_2D, textures[1]
-			gl.texImage2D gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[1].image
-			gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR
-			gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR
-
-			# 3rd image uses mipmapping for min filter
-			gl.bindTexture gl.TEXTURE_2D, textures[2]
-			gl.texImage2D gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[2].image
-			gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR
-			gl.texParameteri gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST
-			gl.generateMipmap gl.TEXTURE_2D
-
+			# Clear the texture in use
 			gl.bindTexture gl.TEXTURE_2D, null
 
 		initBuffers: ->
@@ -226,7 +234,7 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			# Set texture
 			gl.activeTexture gl.TEXTURE0
-			gl.bindTexture gl.TEXTURE_2D, @crateTextures[@filter]
+			gl.bindTexture gl.TEXTURE_2D, @crateTextures[@magFilter][@minFilter]
 			gl.uniform1i @shaderProgram.samplerUniform, 0
 
 			# Set cube indeces
@@ -239,6 +247,13 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			# Draw cube
 			gl.drawElements gl.TRIANGLES, @vertexIndexBuffer.numberOfItems, gl.UNSIGNED_SHORT, 0
 
+		setMinFilter : (minFilter) ->
+			@minFilter = minFilter
+
+		setMagFilter : (magFilter) ->
+			@magFilter = magFilter
+
+
 		# Helper method to convert degrees to radians
 		# todo consider moving to some other class/module
 		degToRad = (degrees) ->
@@ -246,5 +261,5 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 	{
 		'getInstance' : ()-> 
-			return new Cube()
+			return new TexturedCube()
 	}

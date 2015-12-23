@@ -1,0 +1,31 @@
+<html>
+  <body>
+
+  	<!-- Import required dependencies -->
+    <script src="../lib/require.js" data-main="../lib/filterDemoMain" ></script>
+
+    <!-- the canvas -->
+    <canvas id="theCanvas" width="640" height="480" >
+    	Your browser does not support HTML 5
+    </canvas>
+
+    <br>
+
+    <div>
+    	Minification:<br/>
+    	<input type="radio" id="min-nearest" name="minification" value="nearest" checked />Nearest<br/>
+    	<input type="radio" id="min-linear" name="minification" value="linear" />Linear<br/>
+    	<input type="radio" id="min-nearest-mipmap-nearest" name="minification" value="Nearest mipmap nearest" />Nearest mipmap nearest<br/>
+    	<input type="radio" id="min-linear-mipmap-nearest" name="minification" value="Linear mipmap nearest" />Linear mipmap nearest<br/>
+    	<input type="radio" id="min-nearest-mipmap-linear" name="minification" value="Nearest mipmap linear" />Nearest mipmap linear<br/>
+    	<input type="radio" id="min-linear-mipmap-linear" name="minification" value="Linear mipmap linear" />Linear mipmap linear<br/>
+    </div>
+    <br/>
+    <div>
+	    Magnification:<br/>
+	    <input type="radio" id="mag-nearest" name="magnification" value="nearest" checked/>Nearest<br/>
+		<input type="radio" id="mag-linear" name="magnification" value="linear" />Linear<br/>
+	</div>
+
+  </body>
+</html>
