@@ -27,6 +27,7 @@ define ['GLContext', 'shaderSrcs'], (glContext, shaderSrcs)->
 		# Check the compile status of the vertex shader
 		if !gl.getShaderParameter vertexShader, gl.COMPILE_STATUS
 			console.log "Unable to compile vertex shader #{vertexShaderName}."
+			console.log gl.getShaderInfoLog vertexShader
 			return programInstance
 
 		# Set the vertex shader's compile success to true
@@ -59,6 +60,8 @@ define ['GLContext', 'shaderSrcs'], (glContext, shaderSrcs)->
 		shaderProgram.linkSuccess = true
 
 		return programInstance
+
+	console 
 
 	# Return an object with getInstance method
 	return {

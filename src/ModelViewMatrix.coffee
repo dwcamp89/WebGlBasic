@@ -4,12 +4,12 @@ define ['glMatrix-0.9.5.min'], (glMatrix)->
 	# Internal stack of previous matrices
 	modelViewMatrixStack = []
 
-	pushMatrix = ->
+	modelViewMatrix.pushMatrix = ->
 		copy = mat4.create()
 		mat4.set modelViewMatrix, copy
 		modelViewMatrixStack.push copy
 
-	popMatrix = ->
+	modelViewMatrix.popMatrix = ->
 		if modelViewMatrixStack.size == 0
 			throw "Invalid Pop Matrix"
 		modelViewMatrix = modelViewMatrixStack.pop()
