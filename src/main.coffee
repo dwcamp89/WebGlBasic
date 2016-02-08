@@ -10,6 +10,10 @@ require ['glMatrix-0.9.5.min', 'ModelViewMatrix', 'PerspectiveMatrix', 'webgl-ut
 	# Constant number of stars
 	numberOfStars = 50
 
+	# Add method to convert degrees to radians to Math module
+	Math.toRadians = (degrees)->
+		degrees * Math.PI / 180.0
+
 	initWorldObjects = ->
 		worldObjects = (getNewStarObject(i) for i in [0...numberOfStars])
 
@@ -41,12 +45,7 @@ require ['glMatrix-0.9.5.min', 'ModelViewMatrix', 'PerspectiveMatrix', 'webgl-ut
 
 		# Draw all worldObjects
 		for object in worldObjects
-			object.render()
-
-	# Helper method to convert degrees to radians
-	# todo consider moving to some other class/module
-	degToRad = (degrees) ->
-		degrees * Math.PI / 180.0
+			object.render()	
 
 	# Animate
 	lastTime = 0

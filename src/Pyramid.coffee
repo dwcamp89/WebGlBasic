@@ -96,9 +96,9 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			mat4.translate mvMatrix, [@x, @y, @z]
 
 			# Rotate the object
-			mat4.rotate mvMatrix, degToRad(@xRot), [1, 0, 0]
-			mat4.rotate mvMatrix, degToRad(@yRot), [0, 1, 0]
-			mat4.rotate mvMatrix, degToRad(@zRot), [0, 0, 1]
+			mat4.rotate mvMatrix, Math.toRadians(@xRot), [1, 0, 0]
+			mat4.rotate mvMatrix, Math.toRadians(@yRot), [0, 1, 0]
+			mat4.rotate mvMatrix, Math.toRadians(@zRot), [0, 0, 1]
 
 			# Set pyramid vertices
 			gl.bindBuffer gl.ARRAY_BUFFER, @vertexPositionBuffer
@@ -114,12 +114,6 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			# Draw cube
 			gl.drawArrays gl.TRIANGLES, 0, @vertexPositionBuffer.numberOfItems
-			
-
-		# Helper method to convert degrees to radians
-		# todo consider moving to some other class/module
-		degToRad = (degrees) ->
-			degrees * Math.PI / 180.0
 
 	{
 		'getInstance' : ()-> 

@@ -105,15 +105,15 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			mat4.identity mvMatrix
 			mat4.translate mvMatrix, [0.0, 0.0, @zoom]
-			mat4.rotate mvMatrix, degToRad(@tilt), [1.0, 0.0, 0.0]
+			mat4.rotate mvMatrix, Math.toRadians(@tilt), [1.0, 0.0, 0.0]
 
 			# Move to postion of this star
-			mat4.rotate mvMatrix, degToRad(@angle), [0.0, 1.0, 0.0]
+			mat4.rotate mvMatrix, Math.toRadians(@angle), [0.0, 1.0, 0.0]
 			mat4.translate mvMatrix, [@distance, 0.0, 0.0]
 
 			# Rotate back to face the viewer/camer
-			mat4.rotate mvMatrix, degToRad(@angle * -1.0), [0.0, 1.0, 0.0]
-			mat4.rotate mvMatrix, degToRad(@tilt * -1.0), [1.0, 0.0, 0.0]
+			mat4.rotate mvMatrix, Math.toRadians(@angle * -1.0), [0.0, 1.0, 0.0]
+			mat4.rotate mvMatrix, Math.toRadians(@tilt * -1.0), [1.0, 0.0, 0.0]
 
 			# Draw star in twinkle color
 			if twinkle
@@ -121,7 +121,7 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 				@drawStar()
 
 			# Rotate about z-axis
-			mat4.rotate mvMatrix, degToRad(@spin), [0.0, 0.0, 1.0]
+			mat4.rotate mvMatrix, Math.toRadians(@spin), [0.0, 0.0, 1.0]
 
 			# Draw star in main color
 			gl.uniform3f shaderProgram.colorUniform, @r, @g, @b
@@ -157,12 +157,6 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			gl.uniformMatrix4fv shaderProgram.mvMatrixUniform, false, mvMatrix
 
 			gl.drawArrays gl.TRIANGLE_STRIP, 0, @starVertexPositionBuffer.numberOfItems
-
-
-	# Helper method to convert degrees to radians
-	# todo consider moving to some other class/module
-	degToRad = (degrees) ->
-		degrees * Math.PI / 180.0
 
 	# Return a module that provides factory method for Star object
 	{
