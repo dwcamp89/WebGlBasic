@@ -1,30 +1,38 @@
 # Required JS libraries should be "imported" here by adding to the array
-require ['glMatrix-0.9.5.min', 'ModelViewMatrix', 'PerspectiveMatrix', 'webgl-utils', 'WebGlConstants', 'GLContext', 'ShapeFactory', 'Star'], (glMatrix, mvMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory, Star)->
+require ['glMatrix-0.9.5.min', 
+			'ModelViewMatrix', 
+			'PerspectiveMatrix', 
+			'webgl-utils', 
+			'WebGlConstants', 
+			'GLContext', 
+			'ShapeFactory', 
+			'Star',
+			'World'
+		], (glMatrix, mvMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory, Star, World)->
 
 	# Get the gl context
 	gl = glContext.getSingleton()
 
-	# World objects
+	world = World.getInstance()
 	worldObjects = []
 
 	# Constant number of stars
 	numberOfStars = 50
+
+	# For handling keypress events
+	PAGE_UP = 33
+	PAGE_DOWN = 34
+	LEFT = 37
+	RIGHT = 39
+	UP = 38
+	DOWN = 40
 
 	# Add method to convert degrees to radians to Math module
 	Math.toRadians = (degrees)->
 		degrees * Math.PI / 180.0
 
 	initWorldObjects = ->
-		worldObjects = (getNewStarObject(i) for i in [0...numberOfStars])
-
-	getNewStarObject = (count)->
-		newStarObject = ShapeFactory.getShape 'Star'
-
-		# Set initial parameters
-		newStarObject.distance = (count / numberOfStars) * 5.0
-		newStarObject.rotationSpeed = (count / numberOfStars)
-
-		newStarObject
+		return
 
 	# Helper method to initialize shape buffers
 	initBuffers = ->
@@ -35,13 +43,14 @@ require ['glMatrix-0.9.5.min', 'ModelViewMatrix', 'PerspectiveMatrix', 'webgl-ut
 	drawScene = ->
 		gl.viewport 0, 0, gl.viewportWidth, gl.viewportHeight
 		gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
+
+		if not world.isReadyToRender()
+			return
 		
 		mat4.perspective 45, gl.viewportWidth/gl.viewportHeight, 0.1, 100.0, pMatrix
-
-		gl.blendFunc gl.SRC_ALPHA, gl.ONE
-		gl.enable gl.BLEND
-
 		mat4.identity mvMatrix
+
+		world.render()
 
 		# Draw all worldObjects
 		for object in worldObjects
@@ -50,12 +59,11 @@ require ['glMatrix-0.9.5.min', 'ModelViewMatrix', 'PerspectiveMatrix', 'webgl-ut
 	# Animate
 	lastTime = 0
 	animate = ->
-		# Set the twinkle flag
-		Star.setTwinkle document.getElementById('useTwinkleCheckbox').checked
-
 		timeNow = new Date().getTime()
 		if lastTime != 0
 			elapsedTime = timeNow - lastTime
+
+			world.animate(elapsedTime)
 
 			# Animate each world object
 			for worldObject in worldObjects
@@ -79,30 +87,32 @@ require ['glMatrix-0.9.5.min', 'ModelViewMatrix', 'PerspectiveMatrix', 'webgl-ut
 		currentlyPressedKeys[event.keyCode] = false
 
 	handleKeys = ()->
-		# Page up => zoom in
-		if currentlyPressedKeys[33]
-			for worldObject in worldObjects
-				worldObject.zoom += 2
+		if currentlyPressedKeys[PAGE_UP]
+			world.deltaPitch = 0.6
+		else if currentlyPressedKeys[PAGE_DOWN]
+			world.deltaPitch = -0.6
+		else
+			world.deltaPitch = 0.0
 
-		# Page down => zoom out
-		if currentlyPressedKeys[34]
-			for worldObject in worldObjects
-				worldObject.zoom -= 2
+		if currentlyPressedKeys[LEFT]
+			world.deltaYaw = 0.6
+		else if currentlyPressedKeys[RIGHT]
+			world.deltaYaw = -0.6
+		else
+			world.deltaYaw = 0.0
 
-		# Up => Rotate in positive x direction
-		if currentlyPressedKeys[38]
-			for worldObject in worldObjects
-				worldObject.tilt += 2
-
-		# Down => Rotate in negative x direction
-		if currentlyPressedKeys[40]
-			for worldObject in worldObjects
-				worldObject.tilt -= 2
+		if currentlyPressedKeys[UP]
+			world.speed = 0.003
+		else if currentlyPressedKeys[DOWN]
+		 	world.speed = -0.003
+		else
+			world.speed = 0.0
 
 	# START
 	start = ->
 		initWorldObjects()
 		initBuffers()
+		world.loadWorld()
 
 		# Only continue if gl was initialized
 		if gl

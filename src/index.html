@@ -1,16 +1,25 @@
 <html>
+	<!-- Styling for  -->
+	<style type="text/css">
+		#loadingtext {
+	        position:absolute;
+	        top:250px;
+	        left:150px;
+	        font-size:2em;
+	        color: white;
+	    }
+	</style>
+
 	<body>
 		<!-- Import required dependencies -->
 		<script src="../lib/require.js" data-main="../lib/main" ></script>
 		
 		<!-- The canvas -->
-		<canvas id="theCanvas" width="640" height="480" />
+		<canvas id="theCanvas" width="500" height="500" />
 			Your browser does not support HTML5.
 		</canvas>
 
-		<br/>
-		<input type="checkbox" id="useTwinkleCheckbox"> Use Twinkle </input>
-		<br/>
+		<div id="loadingText">	Loading world...</div>
 	</body>
 
 </html>

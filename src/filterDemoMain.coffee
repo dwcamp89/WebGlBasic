@@ -7,6 +7,10 @@ require ['glMatrix-0.9.5.min', 'PerspectiveMatrix', 'webgl-utils', 'WebGlConstan
 	# Cube object
 	cube = null
 
+	# Add method to convert degrees to radians to Math module
+	Math.toRadians = (degrees)->
+		degrees * Math.PI / 180.0
+
 	# Helper method to initialize shape buffers
 	initBuffers = ->
 		# Initialize cube and buffers
