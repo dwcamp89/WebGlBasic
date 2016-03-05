@@ -5,19 +5,13 @@ require ['glMatrix-0.9.5.min',
 			'webgl-utils', 
 			'WebGlConstants', 
 			'GLContext', 
-			'ShapeFactory', 
-			'Star',
-			'World'
-		], (glMatrix, mvMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory, Star, World)->
+			'ShapeFactory'
+		], (glMatrix, mvMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory)->
 
 	# Get the gl context
 	gl = glContext.getSingleton()
 
-	world = World.getInstance()
 	worldObjects = []
-
-	# Constant number of stars
-	numberOfStars = 50
 
 	# For handling keypress events
 	PAGE_UP = 33
@@ -32,7 +26,9 @@ require ['glMatrix-0.9.5.min',
 		degrees * Math.PI / 180.0
 
 	initWorldObjects = ->
-		return
+		moonSphere = ShapeFactory.getShape 'Sphere'
+		moonSphere.z = -6
+		worldObjects.push moonSphere
 
 	# Helper method to initialize shape buffers
 	initBuffers = ->
@@ -43,14 +39,26 @@ require ['glMatrix-0.9.5.min',
 	drawScene = ->
 		gl.viewport 0, 0, gl.viewportWidth, gl.viewportHeight
 		gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
-
-		if not world.isReadyToRender()
-			return
 		
 		mat4.perspective 45, gl.viewportWidth/gl.viewportHeight, 0.1, 100.0, pMatrix
 		mat4.identity mvMatrix
 
-		world.render()
+		moonSphere = worldObjects[0]
+
+		useLighting = document.getElementById('useLightingCheckbox').checked
+		moonSphere.useLighting = useLighting
+
+		moonSphere.ambientLight.setRed document.getElementById('ambientRedInput').value
+		moonSphere.ambientLight.setGreen document.getElementById('ambientGreenInput').value
+		moonSphere.ambientLight.setBlue document.getElementById('ambientBlueInput').value
+
+		moonSphere.directionalLight.setX document.getElementById('directionalXInput').value
+		moonSphere.directionalLight.setY document.getElementById('directionalYInput').value
+		moonSphere.directionalLight.setZ document.getElementById('directionalZInput').value
+
+		moonSphere.directionalLight.setRed document.getElementById('directionalRedInput').value
+		moonSphere.directionalLight.setGreen document.getElementById('directionalGreenInput').value
+		moonSphere.directionalLight.setBlue document.getElementById('directionalBlueInput').value
 
 		# Draw all worldObjects
 		for object in worldObjects
@@ -63,8 +71,6 @@ require ['glMatrix-0.9.5.min',
 		if lastTime != 0
 			elapsedTime = timeNow - lastTime
 
-			world.animate(elapsedTime)
-
 			# Animate each world object
 			for worldObject in worldObjects
 				worldObject.animate elapsedTime
@@ -75,44 +81,45 @@ require ['glMatrix-0.9.5.min',
 	# Tick for animation
 	tick = ->
 		requestAnimFrame(tick)
-		handleKeys()
 		drawScene()
 		animate()
 
-	currentlyPressedKeys = {}
-	handleKeyDown = (event)->
-		currentlyPressedKeys[event.keyCode] = true
+	mouseDown = false
+	lastMouseX = lastMouseY = null
 
-	handleKeyUp = (event)->
-		currentlyPressedKeys[event.keyCode] = false
+	handleMouseUp = ()->
+		mouseDown = false
 
-	handleKeys = ()->
-		if currentlyPressedKeys[PAGE_UP]
-			world.deltaPitch = 0.6
-		else if currentlyPressedKeys[PAGE_DOWN]
-			world.deltaPitch = -0.6
-		else
-			world.deltaPitch = 0.0
+	handleMouseMove = (event)->
+		if not mouseDown
+			return
 
-		if currentlyPressedKeys[LEFT]
-			world.deltaYaw = 0.6
-		else if currentlyPressedKeys[RIGHT]
-			world.deltaYaw = -0.6
-		else
-			world.deltaYaw = 0.0
+		newX = event.clientX
+		deltaX = newX - lastMouseX
 
-		if currentlyPressedKeys[UP]
-			world.speed = 0.003
-		else if currentlyPressedKeys[DOWN]
-		 	world.speed = -0.003
-		else
-			world.speed = 0.0
+		newY = event.clientY
+		deltaY = newY - lastMouseY
+
+		newRotationMatrix = mat4.create()
+		mat4.identity newRotationMatrix
+		mat4.rotate newRotationMatrix, (Math.toRadians deltaX / 10), [0, 1, 0]
+		mat4.rotate newRotationMatrix, (Math.toRadians deltaY / 10), [1, 0, 0]
+
+		sphere = worldObjects[0]
+		mat4.multiply newRotationMatrix, sphere.rotationMatrix, sphere.rotationMatrix
+
+		lastMouseX = newX
+		lastMouseY = newY
+
+	handleMouseDown = (event)->
+		mouseDown = true
+		lastMouseX = event.clientX
+		lastMouseY = event.clientY
 
 	# START
 	start = ->
 		initWorldObjects()
 		initBuffers()
-		world.loadWorld()
 
 		# Only continue if gl was initialized
 		if gl
@@ -120,8 +127,9 @@ require ['glMatrix-0.9.5.min',
 			gl.clear gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT
 
 		# Set the key event handlers
-		document.onkeydown = handleKeyDown
-		document.onkeyup = handleKeyUp
+		document.onmouseup = handleMouseUp
+		document.onmousemove = handleMouseMove
+		glContext.getCanvas().onmousedown = handleMouseDown
 
 		tick()
 

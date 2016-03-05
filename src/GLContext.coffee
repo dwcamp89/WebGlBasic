@@ -17,11 +17,9 @@ define ['WebGlConstants'], (webGlConstants)->
 	if !gl
 		alert 'Unable to initialize WebGL. Your browser may not support it.'
 		gl = null;
-
-	# for testing, todo remove
-	gl.a = 'a'
 	
 	# Return the gl object
 	{
 		getSingleton : ()-> return gl
+		getCanvas : ()-> return canvas
 	}

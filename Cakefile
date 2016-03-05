@@ -42,7 +42,8 @@ buildShaders = ->
 		'basic2.vert', 'basic2.frag', 
 		'texture.vert', 'texture.frag', 
 		'light1.vert', 'light1.frag',
-		'star.vert', 'star.frag'
+		'star.vert', 'star.frag',
+		'sphere.vert', 'sphere.frag'
 	]
 
 	# Iterate through all shader files, adding the source code to shaderSrcs map object
