@@ -209,6 +209,8 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			# Draw cube
 			gl.drawElements gl.TRIANGLES, @vertexIndexBuffer.numberOfItems, gl.UNSIGNED_SHORT, 0
 
+		animate : =>
+
 	{
 		'getInstance' : ()-> 
 			return new Cube()

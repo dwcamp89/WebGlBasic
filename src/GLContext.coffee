@@ -5,7 +5,7 @@ define ['WebGlConstants'], (webGlConstants)->
 
 	# Init web gl context
 	try
-		gl = canvas.getContext webGlConstants.WEB_GL_CONTEXT_NAME
+		gl = canvas.getContext webGlConstants.WEB_GL_CONTEXT_NAME, {alpha: false}
 		gl = gl ? (canvas.getContext webGlConstants.EXPERIMENTAL_WEB_GL_CONTEXT_NAME)
 		gl.viewportWidth = canvas.width
 		gl.viewportHeight = canvas.height

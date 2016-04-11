@@ -31,7 +31,7 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			@xRotSpeed = @yRotSpeed = @zRotSpeed = 10
 
 			# Filter number
-			@filter = 0#FILTER_NEAREST # TODO - BAD?
+			@filter = 0#FILTER_NEAREST
 			@minFilter = gl.NEAREST
 			@magFilter = gl.NEAREST
 
@@ -217,12 +217,12 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			# Move to location of this object
 			mat4.identity mvMatrix
-			mat4.translate mvMatrix, [@x, @y, @z]
+			mat4.translate mvMatrix.getMatrix(), [@x, @y, @z]
 
 			# Rotate the object
-			mat4.rotate mvMatrix, Math.toRadians(@xRot), [1, 0, 0]
-			mat4.rotate mvMatrix, Math.toRadians(@yRot), [0, 1, 0]
-			mat4.rotate mvMatrix, Math.toRadians(@zRot), [0, 0, 1]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@xRot), [1, 0, 0]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@yRot), [0, 1, 0]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@zRot), [0, 0, 1]
 
 			# Set cube vertices
 			gl.bindBuffer gl.ARRAY_BUFFER, @vertexPositionBuffer
@@ -242,10 +242,13 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			# Set matrix uniforms
 			gl.uniformMatrix4fv @shaderProgram.pMatrixUniform, false, pMatrix
-			gl.uniformMatrix4fv @shaderProgram.mvMatrixUniform, false, mvMatrix
+			gl.uniformMatrix4fv @shaderProgram.mvMatrixUniform, false, mvMatrix.getMatrix()
 
 			# Draw cube
 			gl.drawElements gl.TRIANGLES, @vertexIndexBuffer.numberOfItems, gl.UNSIGNED_SHORT, 0
+
+		animate : =>
+			# do nothing
 
 		setMinFilter : (minFilter) ->
 			@minFilter = minFilter

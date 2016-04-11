@@ -16,6 +16,9 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			@ambientLight = LightFactory.getInstance 'AmbientLight'
 			@directionalLight = LightFactory.getInstance 'DirectionalLight'
+			@pointLight = LightFactory.getInstance 'PointLight'
+			@pointLight.setX 0
+			@pointLight.setZ -20
 
 			@rotationMatrix = mat4.create()
 			mat4.identity @rotationMatrix
@@ -48,22 +51,29 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 		initializeShader = ()->
 			shaderProgram = ShaderProgramFactory.getInstance 'sphere.vert', 'sphere.frag'
 			
-			shaderProgram.ambientColorUniform = gl.getUniformLocation shaderProgram.program, 'uAmbientColor'
-			shaderProgram.lightingDirectionUniform = gl.getUniformLocation shaderProgram.program, 'uLightingDirection'
-			shaderProgram.lightingColorUniform = gl.getUniformLocation shaderProgram.program, 'uDirectionalColor'
-			shaderProgram.samplerUniform = gl.getUniformLocation shaderProgram.program, 'uSampler'
-			shaderProgram.pMatrixUniform = gl.getUniformLocation shaderProgram.program, 'uPMatrix'
-			shaderProgram.mvMatrixUniform = gl.getUniformLocation shaderProgram.program, 'uMVMatrix'
-			shaderProgram.normalMatrixUniform = gl.getUniformLocation shaderProgram.program, 'uNormalMatrix'
-			shaderProgram.useLightingUniform = gl.getUniformLocation shaderProgram.program, 'uUseLighting'
+			shaderProgram.ambientColorUniform = gl.getUniformLocation shaderProgram.program, 		'uAmbientColor'
 
-			shaderProgram.vertexPositionAttribute = gl.getAttribLocation shaderProgram.program, 'aVertexPosition'
+			shaderProgram.lightingDirectionUniform = gl.getUniformLocation shaderProgram.program, 	'uLightingDirection'
+			shaderProgram.lightingColorUniform = gl.getUniformLocation shaderProgram.program, 		'uDirectionalColor'
+
+			shaderProgram.samplerUniform = gl.getUniformLocation shaderProgram.program, 			'uSampler'
+
+			shaderProgram.pMatrixUniform = gl.getUniformLocation shaderProgram.program, 			'uPMatrix'
+			shaderProgram.mvMatrixUniform = gl.getUniformLocation shaderProgram.program, 			'uMVMatrix'
+
+			shaderProgram.normalMatrixUniform = gl.getUniformLocation shaderProgram.program, 		'uNormalMatrix'
+			shaderProgram.useLightingUniform = gl.getUniformLocation shaderProgram.program, 		'uUseLighting'
+
+			shaderProgram.pointLightingColorUniform = gl.getUniformLocation shaderProgram.program, 	'uPointLightingColor'
+			shaderProgram.pointLightingLocationUniform = gl.getUniformLocation shaderProgram.program,'uPointLightingLocation'
+
+			shaderProgram.vertexPositionAttribute = gl.getAttribLocation shaderProgram.program, 	'aVertexPosition'
 			gl.enableVertexAttribArray shaderProgram.vertexPositionAttribute
 
-			shaderProgram.textureCoordinateAttribute = gl.getAttribLocation shaderProgram.program, 'aTextureCoord'
+			shaderProgram.textureCoordinateAttribute = gl.getAttribLocation shaderProgram.program, 	'aTextureCoord'
 			gl.enableVertexAttribArray shaderProgram.textureCoordinateAttribute
 
-			shaderProgram.vertexNormalAttribute = gl.getAttribLocation shaderProgram.program, 'aVertexNormal'
+			shaderProgram.vertexNormalAttribute = gl.getAttribLocation shaderProgram.program, 		'aVertexNormal'
 			gl.enableVertexAttribArray shaderProgram.vertexNormalAttribute
 
 			shaderProgram
@@ -137,6 +147,7 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 		render : =>
 			gl.enable gl.DEPTH_TEST
+			gl.disable gl.BLEND
 			gl.useProgram @shaderProgram.program
 
 			@setLightingUniforms()
@@ -155,27 +166,17 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 				return
 
 			gl.uniform3f @shaderProgram.ambientColorUniform, @ambientLight.getRed(), @ambientLight.getGreen(), @ambientLight.getBlue()
-
-			adjustedLightDirection = normalizeAndFlip [@directionalLight.getX(), @directionalLight.getY(), @directionalLight.getZ()]
-			gl.uniform3fv @shaderProgram.lightingDirectionUniform, adjustedLightDirection
-
-			gl.uniform3f @shaderProgram.lightingColorUniform, @directionalLight.getRed(), @directionalLight.getGreen(), @directionalLight.getBlue()
+			gl.uniform3f @shaderProgram.pointLightingLocationUniform, @pointLight.getX(), @pointLight.getY(), @pointLight.getZ()
+			gl.uniform3f @shaderProgram.pointLightingColorUniform, @pointLight.getRed(), @pointLight.getGreen(), @pointLight.getBlue()
 
 		setPosition : ()=>
-			mat4.identity mvMatrix
-			mat4.translate mvMatrix, [@x, @y, @z]
-			mat4.multiply mvMatrix, @rotationMatrix
+			mat4.translate mvMatrix.getMatrix(), [@x, @y, @z]
+			mat4.multiply mvMatrix.getMatrix(), @rotationMatrix
 
 		setTexture : ()=>
 			gl.activeTexture gl.TEXTURE0
 			gl.bindTexture gl.TEXTURE_2D, @texture
 			gl.uniform1i @shaderProgram.samplerUniform, 0
-
-		normalizeAndFlip = (baseVector)->
-			adjustedVector = vec3.create()
-			vec3.normalize baseVector, adjustedVector
-			vec3.scale adjustedVector, -1
-			adjustedVector
 
 		setVertexAttributes : ()=>
 			gl.bindBuffer gl.ARRAY_BUFFER, @vertexPositionBuffer
@@ -190,10 +191,10 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 		setMatrixUniforms : ()=>
 			gl.uniformMatrix4fv @shaderProgram.pMatrixUniform, false, pMatrix
-			gl.uniformMatrix4fv @shaderProgram.mvMatrixUniform, false, mvMatrix
+			gl.uniformMatrix4fv @shaderProgram.mvMatrixUniform, false, mvMatrix.getMatrix()
 
 			normalMatrix = mat3.create()
-			mat4.toInverseMat3 mvMatrix, normalMatrix
+			mat4.toInverseMat3 mvMatrix.getMatrix(), normalMatrix
 			mat3.transpose normalMatrix
 			gl.uniformMatrix3fv @shaderProgram.normalMatrixUniform, false, normalMatrix
 

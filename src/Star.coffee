@@ -85,35 +85,26 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 		# Function to update position and angles
 		animate : (elapsedTime)=>
-			# Rotate about z-axis
-			@angle += @rotationSpeed * 0.06 * elapsedTime
-
-			# Update location
-			@distance -= 0.01 * 0.06 * elapsedTime
-
-			# If the star went too far, reset to center and reset colors
-			if(@distance < 0)
-				@distance += 5
-				this.randomizeColors()
+			# do nothing
 
 		render : =>
-			# Disable depth tesing for stars
-			gl.disable gl.DEPTH_TEST
+			gl.enable gl.BLEND
+			gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
 
 			gl.useProgram shaderProgram.program
 			mvMatrix.pushMatrix()
 
-			mat4.identity mvMatrix
-			mat4.translate mvMatrix, [0.0, 0.0, @zoom]
-			mat4.rotate mvMatrix, Math.toRadians(@tilt), [1.0, 0.0, 0.0]
+			mat4.identity mvMatrix.getMatrix()
+			mat4.translate mvMatrix.getMatrix(), [0.0, 0.0, @zoom]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@tilt), [1.0, 0.0, 0.0]
 
 			# Move to postion of this star
-			mat4.rotate mvMatrix, Math.toRadians(@angle), [0.0, 1.0, 0.0]
-			mat4.translate mvMatrix, [@distance, 0.0, 0.0]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@angle), [0.0, 1.0, 0.0]
+			mat4.translate mvMatrix.getMatrix(), [@distance, 0.0, 0.0]
 
 			# Rotate back to face the viewer/camer
-			mat4.rotate mvMatrix, Math.toRadians(@angle * -1.0), [0.0, 1.0, 0.0]
-			mat4.rotate mvMatrix, Math.toRadians(@tilt * -1.0), [1.0, 0.0, 0.0]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@angle * -1.0), [0.0, 1.0, 0.0]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@tilt * -1.0), [1.0, 0.0, 0.0]
 
 			# Draw star in twinkle color
 			if twinkle
@@ -121,7 +112,7 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 				@drawStar()
 
 			# Rotate about z-axis
-			mat4.rotate mvMatrix, Math.toRadians(@spin), [0.0, 0.0, 1.0]
+			mat4.rotate mvMatrix.getMatrix(), Math.toRadians(@spin), [0.0, 0.0, 1.0]
 
 			# Draw star in main color
 			gl.uniform3f shaderProgram.colorUniform, @r, @g, @b
@@ -154,11 +145,12 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 
 			# Set matrix uniforms
 			gl.uniformMatrix4fv shaderProgram.pMatrixUniform, false, pMatrix
-			gl.uniformMatrix4fv shaderProgram.mvMatrixUniform, false, mvMatrix
+			gl.uniformMatrix4fv shaderProgram.mvMatrixUniform, false, mvMatrix.getMatrix()
 
 			gl.drawArrays gl.TRIANGLE_STRIP, 0, @starVertexPositionBuffer.numberOfItems
 
 	# Return a module that provides factory method for Star object
+	# and setter for class-level twinkle flag
 	{
 		getInstance : ()-> return new Star()
 		setTwinkle : (newTwinkle)->

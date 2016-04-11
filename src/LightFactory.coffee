@@ -45,10 +45,35 @@ define [], ()->
 		setZ : (z)=>
 			@direction[2] = z or 0
 
+	class PointLight extends Light
+		constructor : ->
+			super()
+			@location = [0, 0, 0]
+
+		getX : =>
+			return @location[0]
+
+		getY : =>
+			return @location[1]
+
+		getZ : =>
+			return @location[2]
+
+		setX : (x)=>
+			@location[0] = x or 0
+
+		setY : (y)=>
+			@location[1] = y or 0
+
+		setZ : (z)=>
+			@location[2] = z or 0
+
 	{
 		getInstance : (lightType)->
 			if lightType == 'DirectionalLight'
 				return new DirectionalLight()
+			else if lightType == 'PointLight'
+				return new PointLight()
 			else
 				return new Light()
 	}
