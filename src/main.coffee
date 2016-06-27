@@ -1,3 +1,10 @@
+require.config({
+	paths : {
+		jquery : 'jquery.min'
+		jqColorPicker : 'jqColorPicker.min'
+	}
+})
+
 # Required JS libraries should be "imported" here by adding to the array
 require ['glMatrix-0.9.5.min', 
 			'ModelViewMatrix', 
@@ -5,8 +12,10 @@ require ['glMatrix-0.9.5.min',
 			'webgl-utils', 
 			'WebGlConstants', 
 			'GLContext', 
-			'ShapeFactory'
-		], (glMatrix, mvMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory)->
+			'ShapeFactory',
+			'jquery'
+			'jqColorPicker'
+		], (glMatrix, mvMatrix, pMatrix, webGlUtils, webGlConstants, glContext, ShapeFactory, jQuery, jqColorPicker)->
 
 	# Get the gl context
 	gl = glContext.getSingleton()
@@ -22,9 +31,47 @@ require ['glMatrix-0.9.5.min',
 	DOWN = 40
 
 	moonAngle = 0
-	starAngle = 180
 
 	Z_OFFSET = -20
+
+	# parse rgba(1,2,3)
+	parseRgbString = (rgbString)->
+		rgb = mat3.create()
+		trimmedRgbString = rgbString.substring(rgbString.indexOf('(') + 1, rgbString.length - 1)
+		rgbArray = trimmedRgbString.split ','
+
+		rgb.r = rgbArray[0] / 255.0
+		rgb.g = rgbArray[1] / 255.0
+		rgb.b = rgbArray[2] / 255.0
+
+		rgb
+
+	getAmbientLightColor = ()->
+		parseRgbString jQuery('#ambientColor').css('background-color')
+	getPointLightColor = ()->
+		parseRgbString jQuery('#pointLightColor').css('background-color')
+
+	ambientLightRgb = getAmbientLightColor()
+	pointLightRgb = getPointLightColor()
+
+	setAmbientLight = ()->
+		ambientLightRgb = getAmbientLightColor()
+	setPointLight = ()->
+		pointLightRgb = getPointLightColor()
+	
+
+	# Color picker
+	jQuery('#ambientColor').colorPicker({
+		renderCallback : ()->
+			setAmbientLight()
+		forceAlpha : false
+	})
+
+	jQuery('#pointLightColor').colorPicker({
+		renderCallback : ()->
+			setPointLight()
+		forceAlpha : false
+	})
 
 	# Add method to convert degrees to radians to Math module
 	Math.toRadians = (degrees)->
@@ -36,7 +83,6 @@ require ['glMatrix-0.9.5.min',
 
 		star = ShapeFactory.getShape 'Star'
 		star.zoom = Z_OFFSET
-
 		worldObjects.push star
 
 	# Helper method to initialize shape buffers
@@ -60,30 +106,27 @@ require ['glMatrix-0.9.5.min',
 		mat4.translate mvMatrix.getMatrix(), [0, 0, Z_OFFSET]
 
 		mat4.rotate mvMatrix.getMatrix(), Math.toRadians(moonAngle), [0, 1, 0]
-		mat4.translate mvMatrix.getMatrix(), [5, 0, 0]
+		mat4.translate mvMatrix.getMatrix(), [3, 0, 0]
 
 		moonSphere = worldObjects[0]
 		moonSphere.useLighting = document.getElementById('useLightingCheckbox').checked
 
-		moonSphere.ambientLight.setRed document.getElementById('ambientRedInput').value
-		moonSphere.ambientLight.setGreen document.getElementById('ambientGreenInput').value
-		moonSphere.ambientLight.setBlue document.getElementById('ambientBlueInput').value
+		moonSphere.ambientLight.setRed ambientLightRgb.r
+		moonSphere.ambientLight.setGreen ambientLightRgb.g
+		moonSphere.ambientLight.setBlue ambientLightRgb.b
 
-		moonSphere.pointLight.setRed document.getElementById('pointLightRedInput').value
-		moonSphere.pointLight.setGreen document.getElementById('pointLightGreenInput').value
-		moonSphere.pointLight.setBlue document.getElementById('pointLightBlueInput').value
+		moonSphere.pointLight.setRed pointLightRgb.r
+		moonSphere.pointLight.setGreen pointLightRgb.g
+		moonSphere.pointLight.setBlue pointLightRgb.b
 
 		moonSphere.render()
 
 	renderStar = ->
-		starAngleInRadians = Math.toRadians starAngle
-
 		star = worldObjects[1]
-		star.angle = starAngle
 
-		star.r = document.getElementById('pointLightRedInput').value
-		star.g = document.getElementById('pointLightGreenInput').value
-		star.b = document.getElementById('pointLightBlueInput').value
+		star.r = pointLightRgb.r
+		star.g = pointLightRgb.g
+		star.b = pointLightRgb.b
 
 		star.render()
 
@@ -95,7 +138,6 @@ require ['glMatrix-0.9.5.min',
 			elapsedTime = timeNow - lastTime
 
 			moonAngle += 0.05 * elapsedTime
-			starAngle += 0.05 * elapsedTime
 
 		lastTime = timeNow
 

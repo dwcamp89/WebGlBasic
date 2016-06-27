@@ -1,12 +1,22 @@
 <html>
-	<!-- Styling for  -->
 	<style type="text/css">
-		#loadingtext {
-	        position:absolute;
-	        top:250px;
-	        left:150px;
-	        font-size:2em;
-	        color: white;
+	    div.colorPickerBorder {
+	    	background-color:grey;
+	    	border-radius:2px;
+	    	padding:1px;
+	    	width:15px;
+	    }
+	    div.colorPickerMiddle {
+	    	background-color:white;
+	    	border-radius:2px;
+	    	padding:2px;
+	    }
+	    div.colorPickerCenter {
+	    	border-radius:2px;
+	    	height:10px
+	    }
+	    .lightType{
+	    	font-family: Arial;
 	    }
 	</style>
 
@@ -20,21 +30,37 @@
 		</canvas>
 
 		<br>
-		<input type="checkbox" id="useLightingCheckbox" checked>Use Lighting</input>
+		<label for="useLightingCheckbox" class="lightType" >Use Lighting</label>
+		<input type="checkbox" id="useLightingCheckbox" checked></input>
 
 		<br><br>
-		Ambient color:
-		<br>
-		R: <input id="ambientRedInput" value="0.1" />
-		G: <input id="ambientGreenInput" value="0.0" />
-		B: <input id="ambientBlueInput" value="0.5" />
 
-		<br><br>
-		Point light color:
-		<br>
-		R: <input id="pointLightRedInput" value="0.7" />
-		G: <input id="pointLightGreenInput" value="0.0" />
-		B: <input id="pointLightBlueInput" value="0.0" />
+		<table>
+			<tr>
+				<td class="lightType" >
+					Ambient color:
+				</td>
+				<td>
+					<div class="colorPickerBorder" >
+						<div class="colorPickerMiddle" >
+							<div id="ambientColor" class="colorPickerCenter" style="background-color: blue;"></div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="lightType" >
+					Point light color:
+				</td>
+				<td>
+					<div class="colorPickerBorder" >
+						<div class="colorPickerMiddle" >
+							<div id="pointLightColor" class="colorPickerCenter" style="background-color: red;"></div>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
 
 	</body>
 

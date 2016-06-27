@@ -213,10 +213,8 @@ define ['GLContext', 'ModelViewMatrix', 'PerspectiveMatrix', 'glMatrix-0.9.5.min
 			# Use this shader program
 			gl.useProgram @shaderProgram.program
 
-			mat4.perspective 45, gl.viewportWidth/gl.viewportHeight, 0.1, 100.0, pMatrix
-
 			# Move to location of this object
-			mat4.identity mvMatrix
+			mat4.identity mvMatrix.getMatrix()
 			mat4.translate mvMatrix.getMatrix(), [@x, @y, @z]
 
 			# Rotate the object
